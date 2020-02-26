@@ -1,0 +1,62 @@
+*{
+	margin:0;
+	padding:0;
+}
+body{
+	margin:3% 5% 0 5%;
+	position: relative;
+}
+table{
+	border-spacing: 0;
+}
+td{
+	width:50px;
+	height:20.8px;
+	line-height:1.3;
+	position: relative;
+	text-align: center;
+}
+table img{
+	width:30%;
+	z-index: 1;
+	position: absolute;
+	right:-8px;
+	top:3px;
+}
+table td div {
+	width:32px;
+	z-index: 1;
+	position: absolute;
+	top:-13px;
+	left:44px;
+}
+#legend {
+	display: none;
+	list-style-type:none;
+	overflow: hidden;
+}
+#legend ul {
+	float: left;
+	margin-right: 20px;
+}
+#legend ul li{
+	display: none;
+}
+#legend ul li span {
+	margin-right: 10px;
+	font-size: 30px;
+	line-height: 1.2;
+}
+input.text{
+	border:none;
+    width:60px;
+    line-height:1.3;
+    text-align: center;
+    font-size: 16px;
+}
+input.icon{
+	background: url("Pencil Icon1.png") no-repeat 45px 2px;
+}
+#save{
+    margin: 10px 0;
+}

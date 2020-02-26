@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>让图表数据可变</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="ife31data.js"></script>
+</head>
+<body>
+    <form>
+        <div id="product-checkbox-wrapper">
+            <input type="checkbox" name="product" value="手机">手机</input>
+            <input type="checkbox" name="product" value="笔记本">笔记本</input>
+            <input type="checkbox" name="product" value="智能音箱">智能音箱</input>
+            <input type="checkbox" name="product" value="全选">全选</input>
+        </div>        
+        <div id="region-checkbox-wrapper">
+            <input type="checkbox" name="region" value="华东">华东</input>
+            <input type="checkbox" name="region" value="华北">华北</input>
+            <input type="checkbox" name="region" value="华南">华南</input>
+            <input type="checkbox" name="region" value="全选">全选</input>
+        </div>
+        <input type="button" name="save" value="保存" id="save">        
+    </form>
+    <ul id="legend">
+        <ul>
+            <li><span style="color:#60acfc">■</span>手机-华东</li>
+            <li><span style="color:#3c72c4">■</span>手机-华北</li>
+            <li><span style="color:#2292dd">■</span>手机-华南</li>            
+        </ul>
+        <ul>
+            <li><span style="color:#5bc49f">■</span>笔记本-华东</li>
+            <li><span style="color:#8cbb44">■</span>笔记本-华北</li>
+            <li><span style="color:#c4c43c">■</span>笔记本-华南</li>            
+        </ul>
+        <ul>
+            <li><span style="color:#ff7c7c">■</span>智能音箱-华东</li>
+            <li><span style="color:#b34d4d">■</span>智能音箱-华北</li>
+            <li><span style="color:#d52bb3">■</span>智能音箱-华南</li>            
+        </ul>
+    </ul>
+    <canvas id = "histogram"></canvas>
+    <canvas id = "linechart"></canvas>
+    <table>
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+    <script type="text/javascript" src="base.js" ></script>
+    <script type="text/javascript" src="dataTransform.js" ></script>
+    <script type="text/javascript" src="localStorage.js" ></script>
+   
+    <script type="text/javascript" src="drawTable.js" ></script>
+    <script type="text/javascript" src="drawChart.js" ></script>
+    <script type="text/javascript" src="checkbox.js" ></script>
+    <script type="text/javascript" src="route.js" ></script>    
+    <script>
+        window.addEventListener("load",selectCheckbox_AccordingToHash);
+        window.addEventListener("hashchange",selectCheckbox_AccordingToHash);
+        // 鼠标移入某一行，则只显示该行数据到图表中
+        // 鼠标移入某个input，在相应input右边显示一个图标。
+        document.querySelector("tbody").addEventListener("mouseover",function(e){
+            let trs = document.querySelector("tbody").querySelectorAll("tr");
+            for ( let i = 0; i < trs.length; i++){
+                // 因为input边界和td边界之间有空隙，因此鼠标会出现离开了input但是进入td的情况，因此要考虑鼠标进入td元素
+                if ( e.target.parentNode.parentNode == trs[i] || e.target.parentNode === trs[i]  ) {
+                    drawCoordinate(dataOfHistogramCoordinate);
+                    drawCoordinate(dataOfLinechartCoordinate);
+                    drawPolyline({
+                        id:"#linechart",
+                        source: sourceArr,
+                        xStart: 50,
+                        yStart: 15,
+                        axisH: 250,
+                        axisL: 500,
+                        xquota: 11,
+                        data:chooseSourceData_AccordingToSomeCheckboxInput(sourceArr)[i]
+                    })
+                    drawColumn({
+                        id:"#histogram",
+                        source: sourceArr,
+                        xStart: 50,
+                        yStart: 15,
+                        axisH: 250,
+                        axisL: 500,
+                        xquota: 12,  
+                        data:[chooseSourceData_AccordingToSomeCheckboxInput(sourceArr)[i]]
+                    });
+                }
+            }
+            if ( e.target.tagName == "INPUT" && e.target.className === "text" ){
+                e.target.className += " icon";
+            }
+        })
+        // 鼠标离开tbody，则显示所有数据
+        // 鼠标移出某个input，在相应input右边不显示图标。
+        document.querySelector("tbody").addEventListener("mouseout",function(e){
+            drawChart();
+            if ( e.target.tagName == "INPUT" && e.target.className.indexOf("text") !== -1 ){
+                e.target.classList.remove("icon");
+            }
+        })
+        document.querySelector("html").addEventListener("click",function(e){
+            if ( e.target.tagName == "INPUT" && e.target.className.indexOf("text") !== -1 ){  // 检查类名是否包含text，以免和其他input元素重复
+                clickInput(e.target);
+            }
+            if ( e.target.innerText == "取消" || !(e.target.innerText == "取消" || e.target.innerText == "确定" || (e.target.tagName == "INPUT")) ){
+                clickCancel();
+            }
+            if ( e.target.innerText == "确定" ){
+                clickConfirm();
+            }
+        })
+        document.querySelector("tbody").addEventListener("keyup",function(e){
+            if ( e.target.tagName == "INPUT" && e.target.parentNode.tagName == "TD" ){
+                if ( e.keyCode == 27 ){
+                    clickCancel();
+                } else if ( e.keyCode == 13 ){
+                    clickConfirm();
+                }
+            }
+        })
+        
+        document.querySelector("#save").addEventListener("mouseup",function(){
+            if ( localStorage.length == 0 ){
+                transTwoDimensionArrayIntoLocalStorage(translateChineseIntoEnglish(transSourceDataIntoTwoDimensionArray()));
+                transTwoDimensionArrayIntoLocalStorage(translateChineseIntoEnglish(transTableBodyIntoArr()));
+            } else {
+                transTwoDimensionArrayIntoLocalStorage(translateChineseIntoEnglish(transTableBodyIntoArr()));
+            }
+        }) 
+    </script>
+</body>
+</html>
